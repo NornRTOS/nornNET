@@ -12,8 +12,6 @@ MOD_INC    += -I$(NN_DIR)/nn -I$(NN_DIR)/os -I$(NN_DIR)/drv
 MOD_CFLAGS += -DNN_OS_NORNOS
 ifneq ($(wildcard $(APPDIR)/nn_config.h),)
   MOD_CFLAGS += -DNN_CONFIG_H
-else ifneq ($(wildcard $(PROFILE_DIR)/nn_config.h),)
-  MOD_CFLAGS += -DNN_CONFIG_H          # the nornRTOS profile's nn_config.h, on the include path
 endif
 
 # Board specific drivers.

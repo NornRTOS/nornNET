@@ -18,18 +18,25 @@ static uint8_t _netStack[NN_CFG_TASK_STACK] __attribute__((aligned(16)));
 
 /* --- Time ---------------------------------------------------------------------------- */
 
+/* A finite wait is clamped to RTOS_MAX_TIMEOUT, the kernel's longest (about 32.7 s with
+   16 bit ticks, 24.8 days with 32 bit ticks): every wait in nornNET recomputes what is
+   left after waking (the net task its timers, the socket calls their deadline), so a
+   wait that ends early is only an extra loop, while a longer value would be rejected by
+   the kernel or, before that check, truncated to the tick width. */
 static rtos_tick_t msToTicks(nn_ms_t ms)
 {
+    uint64_t t;
+
     if(ms == NN_FOREVER)
         return RTOS_FOREVER;
 #if RTOS_CFG_TICK_HZ == 1000ul
-    return (rtos_tick_t)ms;
+    t = ms;
 #else
-    {
-        const uint32_t t = (uint32_t)(((uint64_t)ms * RTOS_CFG_TICK_HZ + 999ul) / 1000ul);
-        return (rtos_tick_t)(t == 0 && ms != 0 ? 1 : t);
-    }
+    t = ((uint64_t)ms * RTOS_CFG_TICK_HZ + 999ul) / 1000ul;
+    if(t == 0  &&  ms != 0)
+        t = 1;
 #endif
+    return t > RTOS_MAX_TIMEOUT ? RTOS_MAX_TIMEOUT : (rtos_tick_t)t;
 }
 
 nn_ms_t nn_os_now(void)

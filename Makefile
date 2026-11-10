@@ -6,9 +6,6 @@
 #   make nn01-upload PORT=...  flash it;  make nn01-monitor
 #   make nn05-slip             after nn05-upload: SLIP bridge to the TAP plus host servers
 #   make test-all              everything, one line per result (tools/test_all.sh)
-#   make lib BOARD=esp32 PROFILE=default
-#                              the module library of the binary SDK, built against the
-#                              nornRTOS profile (PROFILE_DIR, default ../../profiles/<profile>)
 #
 # NORNOS points at the nornCore checkout (default: next to this repository).
 
@@ -32,19 +29,10 @@ NORNOS_INC = -I$(NORNOS)/kernel -I$(NORNOS)/port/host
 
 HOST_TESTS = $(BUILD)/test_buf $(BUILD)/test_ip $(BUILD)/test_udp $(BUILD)/test_tcp $(BUILD)/test_slip $(BUILD)/test_fuzz $(BUILD)/test_net $(BUILD)/test_tap
 
-.PHONY: all host-test test-all lib nn01 nn01-sim nn01-upload nn01-monitor clean
+.PHONY: all host-test test-all nn01 nn01-sim nn01-upload nn01-monitor clean
 
 all: host-test
 
-BOARD     ?= esp32
-PROFILE   ?= default
-NORN_RTOS ?= $(abspath ../..)
-PROFILE_DIR ?= $(NORN_RTOS)/profiles/$(PROFILE)
-lib:
-	@test -f $(PROFILE_DIR)/nn_config.h || { echo "no nn_config.h in $(PROFILE_DIR)"; exit 1; }
-	$(MAKE) --no-print-directory -C $(NORNOS) modlib MODULES=$(abspath nornnet.mk) MODNAME=nornNET \
-	        MODDIR=$(abspath .) MOD_PROFILE_DIR=$(abspath $(PROFILE_DIR)) PROFILE_DIR=$(abspath $(PROFILE_DIR)) \
-	        BOARD=$(BOARD) PROFILE=$(PROFILE)
 
 $(BUILD)/test_buf $(BUILD)/test_ip $(BUILD)/test_udp $(BUILD)/test_tcp $(BUILD)/test_slip $(BUILD)/test_fuzz: $(BUILD)/test_%: test/test_%.c $(POSIX_SRC) $(wildcard nn/*.h os/*.h drv/*.h test/*.h test/*/nn_config.h)
 	@mkdir -p $(BUILD)

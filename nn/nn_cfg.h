@@ -45,15 +45,8 @@
 
 /** Priority of the net task. It should be above every task that uses the stack: the
     stack lock then costs nothing but a priority raise (nornOS ICPP). */
-#if defined(NN_OS_NORNOS)  &&  !defined(NN_CFG_TASK_PRIO)
-# include "rtos_config.h"                       /* a nornCore profile carries the priority map */
-#endif
 #ifndef NN_CFG_TASK_PRIO
-# ifdef RTOS_PRIO_NET
-#  define NN_CFG_TASK_PRIO      RTOS_PRIO_NET      /* the nornCore profile's priority map */
-# else
-#  error NN_CFG_TASK_PRIO must be defined in nn_config.h
-# endif
+# error NN_CFG_TASK_PRIO must be defined in nn_config.h
 #endif
 
 /** Stack size of the net task in bytes. */
